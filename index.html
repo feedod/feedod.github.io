@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html lang="ru" class="dark">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Крутой поисковик по магазинам">
+  <meta name="description" content="Поисковик по магазинам с автозаполнением и адаптивным дизайном">
+
   <title>Поисковик по Магазинам</title>
-  <!-- Tailwind CSS 4.1 CDN -->
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Custom Theme -->
   <style type="text/tailwindcss">
     @theme {
       --color-primary-light: #4a90e2;
@@ -17,22 +21,28 @@
       --color-bg-dark: #1f2937;
     }
     @keyframes fadeIn {
-      0% { opacity: 0; transform: translateY(10px); }
-      100% { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
     .animate-fadeIn {
-      animation: fadeIn 0.5s ease-in-out;
+      animation: fadeIn 0.4s ease-in-out;
     }
   </style>
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Heroicons 2.1.5 -->
-  <script src="https://cdn.jsdelivr.net/npm/heroicons@2.1.5/dist/heroicons.min.js"></script>
+
+  <!-- Dark theme init -->
+  <script>
+    if (localStorage.getItem('theme') === 'dark') {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center min-h-screen font-[Inter] text-gray-800 dark:text-gray-200 antialiased">
-  <div id="app" role="main"></div>
+  <main id="app" role="main" class="w-full"></main>
 
   <script type="module">
     import { h, render } from 'https://unpkg.com/preact@10.27.1/dist/preact.module.js';
@@ -49,7 +59,8 @@
       const [loading, setLoading] = useState(true);
       const [error, setError] = useState(null);
       const [showSuggestions, setShowSuggestions] = useState(false);
-      const [darkMode, setDarkMode] = useState(true);
+      const [darkMode, setDarkMode] = useState(document.documentElement.classList.contains('dark'));
+
       const inputRef = useRef(null);
       const suggestionsRef = useRef(null);
 
@@ -60,22 +71,22 @@
           headers: { 'Accept': 'application/json' }
         })
           .then(res => {
-            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            if (!res.ok) throw new Error(`Ошибка загрузки: ${res.status}`);
             return res.json();
           })
           .then(jsonData => {
-            if (!Array.isArray(jsonData)) throw new Error('Data is not an array');
+            if (!Array.isArray(jsonData)) throw new Error('Некорректный формат данных');
             setData(jsonData);
             setLoading(false);
           })
           .catch(err => {
             console.error('Fetch error:', err);
-            setError('Ошибка загрузки данных. Пожалуйста, попробуйте позже.');
+            setError('Ошибка загрузки данных. Попробуйте позже.');
             setLoading(false);
           });
       }, []);
 
-      // Debounced suggestions
+      // Suggestions
       useEffect(() => {
         if (query.length < 2 || loading) {
           setSuggestions([]);
@@ -86,22 +97,22 @@
           const lowerQuery = query.toLowerCase().trim();
           const matches = data
             .filter(item =>
-              item.num.toLowerCase().startsWith(lowerQuery) ||
+              item.num.toString().toLowerCase().startsWith(lowerQuery) ||
               item.name.toLowerCase().includes(lowerQuery)
             )
             .slice(0, 10);
           setSuggestions(matches);
           setShowSuggestions(matches.length > 0);
-        }, 150);
+        }, 200);
         return () => clearTimeout(timer);
       }, [query, data, loading]);
 
-      // Handle search
+      // Search
       const handleSearch = () => {
         if (loading || !query.trim()) return;
         const lowerQuery = query.toLowerCase().trim();
         const found = data.filter(item =>
-          item.num.toLowerCase() === lowerQuery ||
+          item.num.toString().toLowerCase() === lowerQuery ||
           item.name.toLowerCase().includes(lowerQuery)
         );
         setResults(found);
@@ -113,16 +124,25 @@
         setQuery(item.num);
         setResults([item]);
         setShowSuggestions(false);
-        inputRef.current.focus();
+        inputRef.current?.focus();
       };
 
       // Toggle dark mode
       const toggleDarkMode = () => {
-        setDarkMode(prev => !prev);
-        document.documentElement.classList.toggle('dark');
+        setDarkMode(prev => {
+          const next = !prev;
+          if (next) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          }
+          return next;
+        });
       };
 
-      // Keyboard navigation
+      // Keyboard events
       const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
           handleSearch();
@@ -131,7 +151,7 @@
           setQuery('');
         } else if (e.key === 'ArrowDown' && showSuggestions) {
           e.preventDefault();
-          const firstSuggestion = suggestionsRef.current.querySelector('[role="option"]');
+          const firstSuggestion = suggestionsRef.current?.querySelector('[role="option"]');
           firstSuggestion?.focus();
         }
       };
@@ -142,16 +162,14 @@
           selectSuggestion(suggestions[index]);
         } else if (e.key === 'ArrowDown') {
           e.preventDefault();
-          const next = suggestionsRef.current.querySelector(`#suggestion-${index + 1}`);
-          next?.focus();
+          suggestionsRef.current?.querySelector(`#suggestion-${index + 1}`)?.focus();
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          const prev = index === 0 ? inputRef.current : suggestionsRef.current.querySelector(`#suggestion-${index - 1}`);
-          prev?.focus();
+          (index === 0 ? inputRef.current : suggestionsRef.current?.querySelector(`#suggestion-${index - 1}`))?.focus();
         }
       };
 
-      // Close suggestions on click outside
+      // Click outside
       useEffect(() => {
         const handleClickOutside = (e) => {
           if (
@@ -168,7 +186,7 @@
 
       if (error) {
         return html`
-          <div class="text-center text-red-500 dark:text-red-400 text-lg font-semibold p-8" role="alert">
+          <div class="text-center text-red-600 dark:text-red-400 text-lg font-semibold p-6" role="alert">
             ${error}
           </div>
         `;
@@ -176,7 +194,7 @@
 
       if (loading) {
         return html`
-          <div class="flex flex-col items-center justify-center" aria-live="polite">
+          <div class="flex flex-col items-center justify-center py-12" aria-live="polite">
             <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-light dark:border-primary-dark"></div>
             <p class="mt-4 text-lg font-semibold">Загрузка данных...</p>
           </div>
@@ -184,7 +202,7 @@
       }
 
       return html`
-        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg mx-4 overflow-hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg mx-4">
           <div class="flex justify-between items-center mb-6">
             <h1 class="text-2xl md:text-3xl font-bold text-primary-light dark:text-primary-dark">
               Поисковик по Магазинам
@@ -195,11 +213,12 @@
               aria-label="Переключить тему"
             >
               ${darkMode
-                ? html`<svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
-                : html`<svg class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>`
+                ? html`<svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v1a1 1 0 01-2 0V3a1 1 0 011-1zm0 12a1 1 0 011 1v1a1 1 0 01-2 0v-1a1 1 0 011-1zm8-5a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-14 0a1 1 0 01-1 1H2a1 1 0 010-2h1a1 1 0 011 1zm11.95-4.536a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM6.464 15.536a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM15.536 15.536a1 1 0 01-1.414 0l-.707-.707a1 1 0 111.414-1.414l.707.707a1 1 0 010 1.414zM4.464 4.464a1 1 0 011.414 0l.707.707A1 1 0 014.464 6.585l-.707-.707a1 1 0 010-1.414zM10 6a4 4 0 100 8 4 4 0 000-8z"/></svg>`
+                : html`<svg class="w-5 h-5 text-gray-800 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707 8 8 0 1017.293 13.293z"/></svg>`
               }
             </button>
           </div>
+
           <div class="relative mb-4" role="search">
             <input
               ref=${inputRef}
@@ -212,7 +231,6 @@
               aria-label="Поле поиска"
               aria-autocomplete="list"
               autocomplete="off"
-              autocapitalize="none"
             />
             ${showSuggestions && html`
               <div
@@ -232,21 +250,23 @@
                     aria-selected="false"
                     tabindex="0"
                   >
-                    <svg class="w-4 h-4 mr-2 text-primary-light dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <svg class="w-4 h-4 mr-2 text-primary-light dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                     ${item.num}: ${item.name}
                   </div>
                 `)}
               </div>
             `}
           </div>
+
           <button
             onClick=${handleSearch}
             class="w-full bg-primary-light dark:bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-secondary-light dark:hover:bg-secondary-dark transition duration-300 mb-6 flex items-center justify-center"
             aria-label="Кнопка поиска"
           >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             Поиск
           </button>
+
           <div class="space-y-4 max-h-96 overflow-y-auto" aria-live="polite">
             ${results.map(result => html`
               <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-md animate-fadeIn">
