@@ -1,589 +1,269 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Крутой поисковик по магазинам с автозаполнением и адаптивным дизайном">
+  <meta name="description" content="Крутой поисковик по магазинам">
   <title>Поисковик по Магазинам</title>
-  <style>
-    /* Общие стили */
-    :root {
-      --primary-light: #4a90e2;
-      --primary-dark: #60a5fa;
-      --secondary-light: #357abd;
-      --secondary-dark: #3b82f6;
-      --bg-light: #f3f4f6;
-      --bg-dark: #1f2937;
-      --text-light: #1f2937;
-      --text-dark: #e5e7eb;
-      --border-light: #d1d5db;
-      --border-dark: #4b5563;
-      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  <!-- Tailwind CSS 4.1 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary-light: #4a90e2;
+      --color-primary-dark: #60a5fa;
+      --color-secondary-light: #357abd;
+      --color-secondary-dark: #3b82f6;
+      --color-bg-light: #f3f4f6;
+      --color-bg-dark: #1f2937;
     }
-
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-light);
-      transition: background 0.3s ease;
-    }
-
-    body.dark {
-      background: linear-gradient(135deg, #1f2937, #374151);
-      color: var(--text-dark);
-    }
-
-    .container {
-      background: #ffffff;
-      padding: 1.5rem;
-      border-radius: 1rem;
-      box-shadow: var(--shadow);
-      width: 100%;
-      max-width: 32rem;
-      margin: 1rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .dark .container {
-      background: var(--bg-dark);
-    }
-
-    h1 {
-      font-size: 1.875rem;
-      font-weight: 700;
-      color: var(--primary-light);
-      margin-bottom: 1.5rem;
-      text-align: center;
-    }
-
-    .dark h1 {
-      color: var(--primary-dark);
-    }
-
-    /* Поиск */
-    .search-container {
-      position: relative;
-      margin-bottom: 1.5rem;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 0.75rem;
-      border: 2px solid var(--primary-light);
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-      background: #ffffff;
-      color: var(--text-light);
-    }
-
-    .dark input[type="text"] {
-      background: #374151;
-      color: var(--text-dark);
-      border-color: var(--primary-dark);
-    }
-
-    input[type="text"]:focus {
-      border-color: var(--secondary-light);
-      box-shadow: 0 0 0 3px rgba(53, 122, 189, 0.2);
-    }
-
-    .dark input[type="text"]:focus {
-      border-color: var(--secondary-dark);
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-
-    input[type="text"]::placeholder {
-      color: #9ca3af;
-    }
-
-    .dark input[type="text"]::placeholder {
-      color: #9ca3af;
-    }
-
-    /* Предложения */
-    .suggestions {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #ffffff;
-      border: 1px solid var(--border-light);
-      border-radius: 0.5rem;
-      max-height: 12rem;
-      overflow-y: auto;
-      z-index: 10;
-      box-shadow: var(--shadow);
-      display: none;
-    }
-
-    .dark .suggestions {
-      background: #374151;
-      border-color: var(--border-dark);
-    }
-
-    .suggestions.active {
-      display: block;
-    }
-
-    .suggestion {
-      padding: 0.75rem;
-      cursor: pointer;
-      transition: background 0.2s ease;
-      display: flex;
-      align-items: center;
-    }
-
-    .suggestion:hover,
-    .suggestion:focus {
-      background: #f0f8ff;
-      outline: none;
-    }
-
-    .dark .suggestion:hover,
-    .dark .suggestion:focus {
-      background: #4b5563;
-    }
-
-    .suggestion svg {
-      width: 1rem;
-      height: 1rem;
-      margin-right: 0.5rem;
-      color: var(--primary-light);
-    }
-
-    .dark .suggestion svg {
-      color: var(--primary-dark);
-    }
-
-    /* Кнопка поиска */
-    button.search-btn {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--primary-light);
-      color: #ffffff;
-      border: none;
-      border-radius: 0.5rem;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .dark button.search-btn {
-      background: var(--primary-dark);
-    }
-
-    button.search-btn:hover {
-      background: var(--secondary-light);
-    }
-
-    .dark button.search-btn:hover {
-      background: var(--secondary-dark);
-    }
-
-    button.search-btn svg {
-      width: 1.25rem;
-      height: 1.25rem;
-      margin-right: 0.5rem;
-    }
-
-    /* Кнопка темы */
-    button.theme-toggle {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      padding: 0.5rem;
-      background: #e5e7eb;
-      border-radius: 50%;
-      border: none;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .dark button.theme-toggle {
-      background: #4b5563;
-    }
-
-    button.theme-toggle:hover {
-      background: #d1d5db;
-    }
-
-    .dark button.theme-toggle:hover {
-      background: #6b7280;
-    }
-
-    button.theme-toggle svg {
-      width: 1.25rem;
-      height: 1.25rem;
-      color: #1f2937;
-    }
-
-    .dark button.theme-toggle svg {
-      color: #f3f4f6;
-    }
-
-    /* Результаты */
-    .results {
-      max-height: 24rem;
-      overflow-y: auto;
-    }
-
-    .result-item {
-      background: #f9fafb;
-      padding: 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
-      box-shadow: var(--shadow);
-      animation: fadeIn 0.5s ease-in-out;
-    }
-
-    .dark .result-item {
-      background: #4b5563;
-    }
-
-    .result-item p {
-      margin: 0.5rem 0;
-    }
-
-    .result-item .num {
-      font-weight: 600;
-      color: var(--primary-light);
-    }
-
-    .dark .result-item .num {
-      color: var(--primary-dark);
-    }
-
-    .no-results {
-      text-align: center;
-      color: #6b7280;
-    }
-
-    .dark .no-results {
-      color: #9ca3af;
-    }
-
-    /* Загрузка */
-    .loading {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
-    }
-
-    .spinner {
-      width: 4rem;
-      height: 4rem;
-      border: 4px solid var(--primary-light);
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-
-    .dark .spinner {
-      border-color: var(--primary-dark);
-      border-top-color: transparent;
-    }
-
-    /* Ошибка */
-    .error {
-      text-align: center;
-      color: #ef4444;
-      font-weight: 600;
-      padding: 2rem;
-    }
-
-    .dark .error {
-      color: #f87171;
-    }
-
-    /* Анимации */
     @keyframes fadeIn {
       0% { opacity: 0; transform: translateY(10px); }
       100% { opacity: 1; transform: translateY(0); }
     }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Адаптивность */
-    @media (min-width: 768px) {
-      .container {
-        padding: 2rem;
-      }
-
-      h1 {
-        font-size: 2.25rem;
-      }
-
-      input[type="text"],
-      button.search-btn {
-        padding: 1rem;
-        font-size: 1.125rem;
-      }
-    }
-
-    @media (max-width: 480px) {
-      .container {
-        margin: 0.5rem;
-        padding: 1rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      button.theme-toggle {
-        top: 1rem;
-        right: 1rem;
-      }
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-in-out;
     }
   </style>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Heroicons 2.1.5 -->
+  <script src="https://cdn.jsdelivr.net/npm/heroicons@2.1.5/dist/heroicons.min.js"></script>
 </head>
-<body>
-  <div class="container" role="main">
-    <div id="app"></div>
-  </div>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center min-h-screen font-[Inter] text-gray-800 dark:text-gray-200 antialiased">
+  <div id="app" role="main"></div>
 
   <script type="module">
-    const app = document.getElementById('app');
-    let data = [];
-    let debounceTimer;
+    import { h, render } from 'https://unpkg.com/preact@10.27.1/dist/preact.module.js';
+    import { useState, useEffect, useRef } from 'https://unpkg.com/preact@10.27.1/hooks/dist/hooks.module.js';
+    import htm from 'https://unpkg.com/htm@3.1.1/dist/htm.module.js';
 
-    // Render functions
-    const renderLoading = () => {
-      app.innerHTML = `
-        <div class="loading" aria-live="polite">
-          <div class="spinner"></div>
-          <p>Загрузка данных...</p>
-        </div>
-      `;
-    };
+    const html = htm.bind(h);
 
-    const renderError = (message) => {
-      app.innerHTML = `
-        <div class="error" role="alert">
-          ${message}
-        </div>
-      `;
-    };
+    const App = () => {
+      const [data, setData] = useState([]);
+      const [query, setQuery] = useState('');
+      const [suggestions, setSuggestions] = useState([]);
+      const [results, setResults] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [showSuggestions, setShowSuggestions] = useState(false);
+      const [darkMode, setDarkMode] = useState(true);
+      const inputRef = useRef(null);
+      const suggestionsRef = useRef(null);
 
-    const renderApp = (state) => {
-      const { query, suggestions, results, showSuggestions, darkMode } = state;
-      app.innerHTML = `
-        <h1>Поисковик по Магазинам</h1>
-        <button class="theme-toggle" aria-label="Переключить тему">
-          <svg fill="currentColor" viewBox="0 0 20 20">
-            ${darkMode
-              ? `<path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>`
-              : `<path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>`
-            }
-          </svg>
-        </button>
-        <div class="search-container" role="search">
-          <input
-            type="text"
-            value="${query}"
-            placeholder="Введите номер или адрес магазина..."
-            aria-label="Поле поиска"
-            aria-autocomplete="list"
-            autocomplete="off"
-            autocapitalize="none"
-          >
-          <div class="suggestions${showSuggestions ? ' active' : ''}" id="suggestions-list" role="listbox" aria-label="Предложения поиска">
-            ${suggestions.map((item, index) => `
-              <div
-                class="suggestion"
-                role="option"
-                id="suggestion-${index}"
-                aria-selected="false"
-                tabindex="0"
-              >
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                ${item.num}: ${item.name}
-              </div>
-            `).join('')}
-          </div>
-        </div>
-        <button class="search-btn" aria-label="Кнопка поиска">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-          </svg>
-          Поиск
-        </button>
-        <div class="results" aria-live="polite">
-          ${results.length > 0
-            ? results.map(result => `
-                <div class="result-item">
-                  <p class="num">Номер магазина: ${result.num}</p>
-                  <p><strong>Территория:</strong> ${result.territory}</p>
-                  <p><strong>Адрес магазина:</strong> ${result.name}</p>
-                </div>
-              `).join('')
-            : query
-              ? `<p class="no-results">Ничего не найдено. Попробуйте другой запрос.</p>`
-              : ''
-          }
-        </div>
-      `;
-    };
+      // Load JSON
+      useEffect(() => {
+        fetch('data.json', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        })
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+          })
+          .then(jsonData => {
+            if (!Array.isArray(jsonData)) throw new Error('Data is not an array');
+            setData(jsonData);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Fetch error:', err);
+            setError('Ошибка загрузки данных. Пожалуйста, попробуйте позже.');
+            setLoading(false);
+          });
+      }, []);
 
-    // State
-    let state = {
-      query: '',
-      suggestions: [],
-      results: [],
-      showSuggestions: false,
-      darkMode: true
-    };
-
-    // Load JSON
-    renderLoading();
-    fetch('data.json', {
-      method: 'GET',
-      headers: { 'Accept': 'application/json' }
-    })
-      .then(res => {
-        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-        return res.json();
-      })
-      .then(jsonData => {
-        if (!Array.isArray(jsonData)) throw new Error('Data is not an array');
-        data = jsonData;
-        renderApp(state);
-        setupEventListeners();
-      })
-      .catch(err => {
-        console.error('Fetch error:', err);
-        renderError('Ошибка загрузки данных. Пожалуйста, попробуйте позже.');
-      });
-
-    // Event listeners
-    function setupEventListeners() {
-      const input = document.querySelector('input[type="text"]');
-      const suggestionsList = document.getElementById('suggestions-list');
-      const searchBtn = document.querySelector('.search-btn');
-      const themeToggle = document.querySelector('.theme-toggle');
-
-      // Input handling
-      input.addEventListener('input', () => {
-        const query = input.value.trim();
-        state.query = query;
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-          if (query.length < 2) {
-            state.suggestions = [];
-            state.showSuggestions = false;
-          } else {
-            const lowerQuery = query.toLowerCase();
-            state.suggestions = data
-              .filter(item =>
-                item.num.toLowerCase().startsWith(lowerQuery) ||
-                item.name.toLowerCase().includes(lowerQuery)
-              )
-              .slice(0, 10);
-            state.showSuggestions = state.suggestions.length > 0;
-          }
-          renderApp(state);
-          setupSuggestionListeners();
+      // Debounced suggestions
+      useEffect(() => {
+        if (query.length < 2 || loading) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+        const timer = setTimeout(() => {
+          const lowerQuery = query.toLowerCase().trim();
+          const matches = data
+            .filter(item =>
+              item.num.toLowerCase().startsWith(lowerQuery) ||
+              item.name.toLowerCase().includes(lowerQuery)
+            )
+            .slice(0, 10);
+          setSuggestions(matches);
+          setShowSuggestions(matches.length > 0);
         }, 150);
-      });
+        return () => clearTimeout(timer);
+      }, [query, data, loading]);
 
-      // Search
-      searchBtn.addEventListener('click', () => {
-        if (!state.query.trim()) return;
-        const lowerQuery = state.query.toLowerCase().trim();
-        state.results = data.filter(item =>
+      // Handle search
+      const handleSearch = () => {
+        if (loading || !query.trim()) return;
+        const lowerQuery = query.toLowerCase().trim();
+        const found = data.filter(item =>
           item.num.toLowerCase() === lowerQuery ||
           item.name.toLowerCase().includes(lowerQuery)
         );
-        state.showSuggestions = false;
-        renderApp(state);
-        setupSuggestionListeners();
-      });
+        setResults(found);
+        setShowSuggestions(false);
+      };
+
+      // Select suggestion
+      const selectSuggestion = (item) => {
+        setQuery(item.num);
+        setResults([item]);
+        setShowSuggestions(false);
+        inputRef.current.focus();
+      };
+
+      // Toggle dark mode
+      const toggleDarkMode = () => {
+        setDarkMode(prev => !prev);
+        document.documentElement.classList.toggle('dark');
+      };
 
       // Keyboard navigation
-      input.addEventListener('keydown', (e) => {
+      const handleKeyDown = (e) => {
         if (e.key === 'Enter') {
-          e.preventDefault();
-          searchBtn.click();
+          handleSearch();
         } else if (e.key === 'Escape') {
-          state.query = '';
-          state.suggestions = [];
-          state.showSuggestions = false;
-          input.value = '';
-          renderApp(state);
-        } else if (e.key === 'ArrowDown' && state.showSuggestions) {
+          setShowSuggestions(false);
+          setQuery('');
+        } else if (e.key === 'ArrowDown' && showSuggestions) {
           e.preventDefault();
-          const firstSuggestion = suggestionsList.querySelector('[role="option"]');
+          const firstSuggestion = suggestionsRef.current.querySelector('[role="option"]');
           firstSuggestion?.focus();
         }
-      });
+      };
 
-      // Theme toggle
-      themeToggle.addEventListener('click', () => {
-        state.darkMode = !state.darkMode;
-        document.body.classList.toggle('dark');
-        renderApp(state);
-        setupSuggestionListeners();
-      });
-
-      // Click outside to close suggestions
-      document.addEventListener('click', (e) => {
-        if (!suggestionsList.contains(e.target) && e.target !== input) {
-          state.showSuggestions = false;
-          renderApp(state);
-          setupSuggestionListeners();
+      const handleSuggestionKeyDown = (e, index) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          selectSuggestion(suggestions[index]);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = suggestionsRef.current.querySelector(`#suggestion-${index + 1}`);
+          next?.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = index === 0 ? inputRef.current : suggestionsRef.current.querySelector(`#suggestion-${index - 1}`);
+          prev?.focus();
         }
-      }, { passive: true });
-    }
+      };
 
-    // Suggestion listeners
-    function setupSuggestionListeners() {
-      const suggestions = document.querySelectorAll('.suggestion');
-      suggestions.forEach((suggestion, index) => {
-        suggestion.addEventListener('click', () => {
-          const item = state.suggestions[index];
-          state.query = item.num;
-          state.results = [item];
-          state.showSuggestions = false;
-          document.querySelector('input[type="text"]').value = item.num;
-          renderApp(state);
-          setupSuggestionListeners();
-        });
-
-        suggestion.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            suggestion.click();
-          } else if (e.key === 'ArrowDown') {
-            e.preventDefault();
-            const next = document.querySelector(`#suggestion-${index + 1}`);
-            next?.focus();
-          } else if (e.key === 'ArrowUp') {
-            e.preventDefault();
-            const prev = index === 0 ? document.querySelector('input[type="text"]') : document.querySelector(`#suggestion-${index - 1}`);
-            prev?.focus();
+      // Close suggestions on click outside
+      useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (
+            suggestionsRef.current &&
+            !suggestionsRef.current.contains(e.target) &&
+            e.target !== inputRef.current
+          ) {
+            setShowSuggestions(false);
           }
-        });
-      });
-    }
+        };
+        document.addEventListener('click', handleClickOutside, { passive: true });
+        return () => document.removeEventListener('click', handleClickOutside);
+      }, []);
+
+      if (error) {
+        return html`
+          <div class="text-center text-red-500 dark:text-red-400 text-lg font-semibold p-8" role="alert">
+            ${error}
+          </div>
+        `;
+      }
+
+      if (loading) {
+        return html`
+          <div class="flex flex-col items-center justify-center" aria-live="polite">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-light dark:border-primary-dark"></div>
+            <p class="mt-4 text-lg font-semibold">Загрузка данных...</p>
+          </div>
+        `;
+      }
+
+      return html`
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg mx-4 overflow-hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-primary-light dark:text-primary-dark">
+              Поисковик по Магазинам
+            </h1>
+            <button
+              onClick=${toggleDarkMode}
+              class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
+              aria-label="Переключить тему"
+            >
+              ${darkMode
+                ? html`<svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
+                : html`<svg class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>`
+              }
+            </button>
+          </div>
+          <div class="relative mb-4" role="search">
+            <input
+              ref=${inputRef}
+              type="text"
+              value=${query}
+              onInput=${e => setQuery(e.target.value)}
+              onKeyDown=${handleKeyDown}
+              placeholder="Введите номер или адрес магазина..."
+              class="w-full p-4 border-2 border-primary-light dark:border-primary-dark rounded-lg focus:outline-none focus:border-secondary-light dark:focus:border-secondary-dark transition duration-300 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+              aria-label="Поле поиска"
+              aria-autocomplete="list"
+              autocomplete="off"
+              autocapitalize="none"
+            />
+            ${showSuggestions && html`
+              <div
+                ref=${suggestionsRef}
+                id="suggestions-list"
+                class="absolute bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-48 overflow-y-auto w-full z-10 shadow-lg animate-fadeIn"
+                role="listbox"
+                aria-label="Предложения поиска"
+              >
+                ${suggestions.map((item, index) => html`
+                  <div
+                    class="p-3 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition duration-200 flex items-center"
+                    onClick=${() => selectSuggestion(item)}
+                    onKeyDown=${e => handleSuggestionKeyDown(e, index)}
+                    role="option"
+                    id="suggestion-${index}"
+                    aria-selected="false"
+                    tabindex="0"
+                  >
+                    <svg class="w-4 h-4 mr-2 text-primary-light dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    ${item.num}: ${item.name}
+                  </div>
+                `)}
+              </div>
+            `}
+          </div>
+          <button
+            onClick=${handleSearch}
+            class="w-full bg-primary-light dark:bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-secondary-light dark:hover:bg-secondary-dark transition duration-300 mb-6 flex items-center justify-center"
+            aria-label="Кнопка поиска"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            Поиск
+          </button>
+          <div class="space-y-4 max-h-96 overflow-y-auto" aria-live="polite">
+            ${results.map(result => html`
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-md animate-fadeIn">
+                <p class="font-semibold text-primary-light dark:text-primary-dark">Номер магазина: ${result.num}</p>
+                <p><strong>Территория:</strong> ${result.territory}</p>
+                <p><strong>Адрес магазина:</strong> ${result.name}</p>
+              </div>
+            `)}
+            ${results.length === 0 && query && html`
+              <p class="text-center text-gray-500 dark:text-gray-400">Ничего не найдено. Попробуйте другой запрос.</p>
+            `}
+          </div>
+        </div>
+      `;
+    };
+
+    render(html`<${App} />`, document.getElementById('app'));
   </script>
 </body>
 </html>
