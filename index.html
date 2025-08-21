@@ -1,1 +1,275 @@
-<script async src="https://telegram.org/js/telegram-widget.js?22" data-telegram-post="telegram/83" data-width="100%"></script>
+<!DOCTYPE html>
+<html lang="ru" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Крутой поисковик по магазинам с автозаполнением и адаптивным дизайном">
+  <meta name="keywords" content="поиск магазинов, автозаполнение, адаптивный дизайн">
+  <meta name="author" content="xAI">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; font-src https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:;">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="DENY">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Поисковик по Магазинам</title>
+  <!-- Tailwind CSS 4.1 CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style type="text/tailwindcss">
+    @theme {
+      --color-primary-light: #4a90e2;
+      --color-primary-dark: #60a5fa;
+      --color-secondary-light: #357abd;
+      --color-secondary-dark: #3b82f6;
+      --color-bg-light: #f3f4f6;
+      --color-bg-dark: #1f2937;
+    }
+    @keyframes fadeIn {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fadeIn {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+  </style>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Heroicons 2.1.5 -->
+  <script src="https://cdn.jsdelivr.net/npm/heroicons@2.1.5/dist/heroicons.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center min-h-screen font-[Inter] text-gray-800 dark:text-gray-200 antialiased">
+  <div id="app" role="main"></div>
+
+  <script type="module">
+    import { h, render } from 'https://unpkg.com/preact@10.27.1/dist/preact.module.js';
+    import { useState, useEffect, useRef } from 'https://unpkg.com/preact@10.27.1/hooks/dist/hooks.module.js';
+    import htm from 'https://unpkg.com/htm@3.1.1/dist/htm.module.js';
+
+    const html = htm.bind(h);
+
+    const App = () => {
+      const [data, setData] = useState([]);
+      const [query, setQuery] = useState('');
+      const [suggestions, setSuggestions] = useState([]);
+      const [results, setResults] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState(null);
+      const [showSuggestions, setShowSuggestions] = useState(false);
+      const [darkMode, setDarkMode] = useState(true);
+      const inputRef = useRef(null);
+      const suggestionsRef = useRef(null);
+
+      // Load JSON
+      useEffect(() => {
+        fetch('data.json', {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        })
+          .then(res => {
+            if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+            return res.json();
+          })
+          .then(jsonData => {
+            if (!Array.isArray(jsonData)) throw new Error('Data is not an array');
+            setData(jsonData);
+            setLoading(false);
+          })
+          .catch(err => {
+            console.error('Fetch error:', err);
+            setError('Ошибка загрузки данных. Пожалуйста, попробуйте позже.');
+            setLoading(false);
+          });
+      }, []);
+
+      // Debounced suggestions
+      useEffect(() => {
+        if (query.length < 2 || loading) {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          return;
+        }
+        const timer = setTimeout(() => {
+          const lowerQuery = query.toLowerCase().trim();
+          const matches = data
+            .filter(item =>
+              item.num.toLowerCase().startsWith(lowerQuery) ||
+              item.name.toLowerCase().includes(lowerQuery)
+            )
+            .slice(0, 10);
+          setSuggestions(matches);
+          setShowSuggestions(matches.length > 0);
+        }, 150);
+        return () => clearTimeout(timer);
+      }, [query, data, loading]);
+
+      // Handle search
+      const handleSearch = () => {
+        if (loading || !query.trim()) return;
+        const lowerQuery = query.toLowerCase().trim();
+        const found = data.filter(item =>
+          item.num.toLowerCase() === lowerQuery ||
+          item.name.toLowerCase().includes(lowerQuery)
+        );
+        setResults(found);
+        setShowSuggestions(false);
+      };
+
+      // Select suggestion
+      const selectSuggestion = (item) => {
+        setQuery(item.num);
+        setResults([item]);
+        setShowSuggestions(false);
+        inputRef.current.focus();
+      };
+
+      // Toggle dark mode
+      const toggleDarkMode = () => {
+        setDarkMode(prev => !prev);
+        document.documentElement.classList.toggle('dark');
+      };
+
+      // Keyboard navigation
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+          handleSearch();
+        } else if (e.key === 'Escape') {
+          setShowSuggestions(false);
+          setQuery('');
+        } else if (e.key === 'ArrowDown' && showSuggestions) {
+          e.preventDefault();
+          const firstSuggestion = suggestionsRef.current.querySelector('[role="option"]');
+          firstSuggestion?.focus();
+        }
+      };
+
+      const handleSuggestionKeyDown = (e, index) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          selectSuggestion(suggestions[index]);
+        } else if (e.key === 'ArrowDown') {
+          e.preventDefault();
+          const next = suggestionsRef.current.querySelector(`#suggestion-${index + 1}`);
+          next?.focus();
+        } else if (e.key === 'ArrowUp') {
+          e.preventDefault();
+          const prev = index === 0 ? inputRef.current : suggestionsRef.current.querySelector(`#suggestion-${index - 1}`);
+          prev?.focus();
+        }
+      };
+
+      // Close suggestions on click outside
+      useEffect(() => {
+        const handleClickOutside = (e) => {
+          if (
+            suggestionsRef.current &&
+            !suggestionsRef.current.contains(e.target) &&
+            e.target !== inputRef.current
+          ) {
+            setShowSuggestions(false);
+          }
+        };
+        document.addEventListener('click', handleClickOutside, { passive: true });
+        return () => document.removeEventListener('click', handleClickOutside);
+      }, []);
+
+      if (error) {
+        return html`
+          <div class="text-center text-red-500 dark:text-red-400 text-lg font-semibold p-8" role="alert">
+            ${error}
+          </div>
+        `;
+      }
+
+      if (loading) {
+        return html`
+          <div class="flex flex-col items-center justify-center" aria-live="polite">
+            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-light dark:border-primary-dark"></div>
+            <p class="mt-4 text-lg font-semibold">Загрузка данных...</p>
+          </div>
+        `;
+      }
+
+      return html`
+        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg mx-4 overflow-hidden">
+          <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl md:text-3xl font-bold text-primary-light dark:text-primary-dark">
+              Поисковик по Магазинам
+            </h1>
+            <button
+              onClick=${toggleDarkMode}
+              class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
+              aria-label="Переключить тему"
+            >
+              ${darkMode
+                ? html`<svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path></svg>`
+                : html`<svg class="w-5 h-5 text-gray-800" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>`
+              }
+            </button>
+          </div>
+          <div class="relative mb-4" role="search">
+            <input
+              ref=${inputRef}
+              type="text"
+              value=${query}
+              onInput=${e => setQuery(e.target.value)}
+              onKeyDown=${handleKeyDown}
+              placeholder="Введите номер или адрес магазина..."
+              class="w-full p-4 border-2 border-primary-light dark:border-primary-dark rounded-lg focus:outline-none focus:border-secondary-light dark:focus:border-secondary-dark transition duration-300 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
+              aria-label="Поле поиска"
+              aria-autocomplete="list"
+              autocomplete="off"
+              autocapitalize="none"
+            />
+            ${showSuggestions && html`
+              <div
+                ref=${suggestionsRef}
+                id="suggestions-list"
+                class="absolute bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-48 overflow-y-auto w-full z-10 shadow-lg animate-fadeIn"
+                role="listbox"
+                aria-label="Предложения поиска"
+              >
+                ${suggestions.map((item, index) => html`
+                  <div
+                    class="p-3 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition duration-200 flex items-center"
+                    onClick=${() => selectSuggestion(item)}
+                    onKeyDown=${e => handleSuggestionKeyDown(e, index)}
+                    role="option"
+                    id="suggestion-${index}"
+                    aria-selected="false"
+                    tabindex="0"
+                  >
+                    <svg class="w-4 h-4 mr-2 text-primary-light dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    ${item.num}: ${item.name}
+                  </div>
+                `)}
+              </div>
+            `}
+          </div>
+          <button
+            onClick=${handleSearch}
+            class="w-full bg-primary-light dark:bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-secondary-light dark:hover:bg-secondary-dark transition duration-300 mb-6 flex items-center justify-center"
+            aria-label="Кнопка поиска"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            Поиск
+          </button>
+          <div class="space-y-4 max-h-96 overflow-y-auto" aria-live="polite">
+            ${results.map(result => html`
+              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-md animate-fadeIn">
+                <p class="font-semibold text-primary-light dark:text-primary-dark">Номер магазина: ${result.num}</p>
+                <p><strong>Территория:</strong> ${result.territory}</p>
+                <p><strong>Адрес магазина:</strong> ${result.name}</p>
+              </div>
+            `)}
+            ${results.length === 0 && query && html`
+              <p class="text-center text-gray-500 dark:text-gray-400">Ничего не найдено. Попробуйте другой запрос.</p>
+            `}
+          </div>
+        </div>
+      `;
+    };
+
+    render(html`<${App} />`, document.getElementById('app'));
+  </script>
+</body>
+</html>
