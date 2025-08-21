@@ -1,289 +1,345 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Поисковик по магазинам с автозаполнением и адаптивным дизайном">
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+  <meta name="description" content="Поисковик по Магазинам." />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self';
+    style-src 'self' 'unsafe-inline';
+    connect-src 'self';
+    img-src 'self' data:;
+    base-uri 'none';
+    form-action 'self';
+    frame-ancestors 'none';
+  " />
   <title>Поисковик по Магазинам</title>
 
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <style>
+    /* Minimal modern reset */
+    :where(html,body){height:100%}
+    *,*::before,*::after{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font: 16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      background: color-mix(in oklab, #f6f7fb 70%, white);
+      color: #0f172a;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:clamp(12px,2vw,24px);
+    }
 
-  <!-- Custom Theme -->
-  <style type="text/tailwindcss">
-    @theme {
-      --color-primary-light: #4a90e2;
-      --color-primary-dark: #60a5fa;
-      --color-secondary-light: #357abd;
-      --color-secondary-dark: #3b82f6;
-      --color-bg-light: #f3f4f6;
-      --color-bg-dark: #1f2937;
+    @media (prefers-color-scheme: dark){
+      body{
+        background: linear-gradient(180deg,#071023 0%, #0b1220 100%);
+        color:#e6eef8;
+      }
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
+
+    :root{
+      --radius:12px;
+      --surface: #ffffff;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #3b82f6;
+      --card-bg: color-mix(in oklab, var(--surface) 88%, var(--accent) 2%);
+      --shadow: 0 10px 30px rgba(2,6,23,.08);
     }
-    .animate-fadeIn {
-      animation: fadeIn 0.4s ease-in-out;
+
+    @media (prefers-color-scheme: dark){
+      :root{
+        --surface:#0f172a;
+        --muted:#9aa4b2;
+        --accent:#60a5fa;
+        --accent-2:#93c5fd;
+        --card-bg: color-mix(in oklab, var(--surface) 90%, var(--accent) 4%);
+        --shadow: 0 10px 30px rgba(0,0,0,.5);
+      }
+    }
+
+    /* Reduced motion respect */
+    @media (prefers-reduced-motion: reduce){
+      * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+    }
+
+    /* Container */
+    .sheet{
+      width:min(960px,100%);
+      max-width:760px;
+      background:var(--surface);
+      border-radius:calc(var(--radius) + 2px);
+      padding:clamp(18px,3.2vw,28px);
+      box-shadow:var(--shadow);
+      display:flex;
+      gap:clamp(12px,2vw,18px);
+      flex-direction:column;
+      align-items:stretch;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+
+    h1{
+      font-size:clamp(1.1rem,1.6vw,1.6rem);
+      margin:0;
+      color:var(--accent);
+      letter-spacing:-0.01em;
+      font-weight:700;
+    }
+
+    /* Theme toggle */
+    .controls-row{
+      display:flex;
+      gap:.5rem;
+      align-items:center;
+    }
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.5rem;
+      border:0;
+      background:transparent;
+      color:inherit;
+      padding:.45rem .65rem;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:600;
+      transition:background .14s ease, transform .08s ease;
+    }
+    .btn:active{ transform:translateY(1px) }
+
+    .theme-btn{
+      border:1px solid color-mix(in oklab, var(--muted) 30%, transparent);
+      padding:.35rem .55rem;
+      font-size:.95rem;
+      background:transparent;
+    }
+
+    /* Form */
+    form{ display:flex; gap:.6rem; align-items:center; margin-top:4px; flex-wrap:wrap }
+    select{
+      flex:1 1 0;
+      min-width:180px;
+      padding:.75rem 1rem;
+      font-size:1rem;
+      border-radius:10px;
+      border:1.5px solid color-mix(in oklab, var(--muted) 20%, transparent);
+      background:var(--surface);
+      color:inherit;
+      outline:none;
+    }
+    select:focus{
+      box-shadow:0 0 0 4px color-mix(in oklab, var(--accent) 18%, transparent);
+      border-color:var(--accent-2);
+    }
+    .search-btn{
+      background:var(--accent);
+      color: #fff;
+      padding:.75rem 1rem;
+      border-radius:10px;
+      border:0;
+      font-weight:700;
+    }
+    .search-btn:hover{ background:var(--accent-2) }
+
+    /* Results */
+    .results{ display:flex; flex-direction:column; gap:.75rem; margin-top:.5rem; max-height:44vh; overflow:auto; padding-right:4px }
+    .card{
+      background:var(--card-bg);
+      border-radius:10px;
+      padding:.85rem 1rem;
+      box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--accent) 12%, transparent);
+    }
+    .meta{ color:var(--muted); font-size:.92rem }
+
+    /* Small screens */
+    @media (max-width:520px){
+      .sheet{ padding:16px }
+      form{ gap:.4rem }
+      .search-btn{ padding:.6rem .8rem }
     }
   </style>
-
-  <!-- Google Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Dark theme init -->
-  <script>
-    if (localStorage.getItem('theme') === 'dark') {
-      document.documentElement.classList.add('dark');
-    }
-  </script>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center min-h-screen font-[Inter] text-gray-800 dark:text-gray-200 antialiased">
-  <main id="app" role="main" class="w-full"></main>
+<body>
+  <main class="sheet" id="app">
+    <a href="#main-search" class="visually-hidden" style="position:absolute;left:-9999px;top:auto;overflow:hidden">Перейти к поиску</a>
 
-  <script type="module">
-    import { h, render } from 'https://unpkg.com/preact@10.27.1/dist/preact.module.js';
-    import { useState, useEffect, useRef } from 'https://unpkg.com/preact@10.27.1/hooks/dist/hooks.module.js';
-    import htm from 'https://unpkg.com/htm@3.1.1/dist/htm.module.js';
+    <header>
+      <h1>Поисковик по Магазинам</h1>
+      <div class="controls-row" aria-hidden="false">
+        <button class="btn theme-btn" id="themeToggle" aria-pressed="false" title="Переключить тему">🌓</button>
+      </div>
+    </header>
 
-    const html = htm.bind(h);
+    <section id="main-search" aria-labelledby="search-label">
+      <label id="search-label" class="visually-hidden">Выберите магазин</label>
+      <form id="searchForm" action="#" onsubmit="return false;">
+        <select id="shopSelect" name="shop" aria-label="Список магазинов">
+          <option value="">— Выберите магазин —</option>
+        </select>
+        <button type="submit" id="searchBtn" class="btn search-btn" aria-label="Показать выбранный магазин">Поиск</button>
+      </form>
 
-    const App = () => {
-      const [data, setData] = useState([]);
-      const [query, setQuery] = useState('');
-      const [suggestions, setSuggestions] = useState([]);
-      const [results, setResults] = useState([]);
-      const [loading, setLoading] = useState(true);
-      const [error, setError] = useState(null);
-      const [showSuggestions, setShowSuggestions] = useState(false);
-      const [darkMode, setDarkMode] = useState(document.documentElement.classList.contains('dark'));
+      <div id="results" class="results" aria-live="polite" aria-atomic="true"></div>
+    </section>
+  </main>
 
-      const inputRef = useRef(null);
-      const suggestionsRef = useRef(null);
+  <script>
+    // Modern, minimal, robust code (ES2025 idioms)
+    const SELECT = document.getElementById('shopSelect');
+    const RESULTS = document.getElementById('results');
+    const FORM = document.getElementById('searchForm');
+    const THEME_TOGGLE = document.getElementById('themeToggle');
+    const SEARCH_BTN = document.getElementById('searchBtn');
 
-      // Load JSON
-      useEffect(() => {
-        fetch('data.json', {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        })
-          .then(res => {
-            if (!res.ok) throw new Error(`Ошибка загрузки: ${res.status}`);
-            return res.json();
-          })
-          .then(jsonData => {
-            if (!Array.isArray(jsonData)) throw new Error('Некорректный формат данных');
-            setData(jsonData);
-            setLoading(false);
-          })
-          .catch(err => {
-            console.error('Fetch error:', err);
-            setError('Ошибка загрузки данных. Попробуйте позже.');
-            setLoading(false);
-          });
-      }, []);
-
-      // Suggestions
-      useEffect(() => {
-        if (query.length < 2 || loading) {
-          setSuggestions([]);
-          setShowSuggestions(false);
-          return;
-        }
-        const timer = setTimeout(() => {
-          const lowerQuery = query.toLowerCase().trim();
-          const matches = data
-            .filter(item =>
-              item.num.toString().toLowerCase().startsWith(lowerQuery) ||
-              item.name.toLowerCase().includes(lowerQuery)
-            )
-            .slice(0, 10);
-          setSuggestions(matches);
-          setShowSuggestions(matches.length > 0);
-        }, 200);
-        return () => clearTimeout(timer);
-      }, [query, data, loading]);
-
-      // Search
-      const handleSearch = () => {
-        if (loading || !query.trim()) return;
-        const lowerQuery = query.toLowerCase().trim();
-        const found = data.filter(item =>
-          item.num.toString().toLowerCase() === lowerQuery ||
-          item.name.toLowerCase().includes(lowerQuery)
-        );
-        setResults(found);
-        setShowSuggestions(false);
-      };
-
-      // Select suggestion
-      const selectSuggestion = (item) => {
-        setQuery(item.num);
-        setResults([item]);
-        setShowSuggestions(false);
-        inputRef.current?.focus();
-      };
-
-      // Toggle dark mode
-      const toggleDarkMode = () => {
-        setDarkMode(prev => {
-          const next = !prev;
-          if (next) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-          }
-          return next;
-        });
-      };
-
-      // Keyboard events
-      const handleKeyDown = (e) => {
-        if (e.key === 'Enter') {
-          handleSearch();
-        } else if (e.key === 'Escape') {
-          setShowSuggestions(false);
-          setQuery('');
-        } else if (e.key === 'ArrowDown' && showSuggestions) {
-          e.preventDefault();
-          const firstSuggestion = suggestionsRef.current?.querySelector('[role="option"]');
-          firstSuggestion?.focus();
-        }
-      };
-
-      const handleSuggestionKeyDown = (e, index) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          selectSuggestion(suggestions[index]);
-        } else if (e.key === 'ArrowDown') {
-          e.preventDefault();
-          suggestionsRef.current?.querySelector(`#suggestion-${index + 1}`)?.focus();
-        } else if (e.key === 'ArrowUp') {
-          e.preventDefault();
-          (index === 0 ? inputRef.current : suggestionsRef.current?.querySelector(`#suggestion-${index - 1}`))?.focus();
-        }
-      };
-
-      // Click outside
-      useEffect(() => {
-        const handleClickOutside = (e) => {
-          if (
-            suggestionsRef.current &&
-            !suggestionsRef.current.contains(e.target) &&
-            e.target !== inputRef.current
-          ) {
-            setShowSuggestions(false);
-          }
-        };
-        document.addEventListener('click', handleClickOutside, { passive: true });
-        return () => document.removeEventListener('click', handleClickOutside);
-      }, []);
-
-      if (error) {
-        return html`
-          <div class="text-center text-red-600 dark:text-red-400 text-lg font-semibold p-6" role="alert">
-            ${error}
-          </div>
-        `;
-      }
-
-      if (loading) {
-        return html`
-          <div class="flex flex-col items-center justify-center py-12" aria-live="polite">
-            <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-primary-light dark:border-primary-dark"></div>
-            <p class="mt-4 text-lg font-semibold">Загрузка данных...</p>
-          </div>
-        `;
-      }
-
-      return html`
-        <div class="bg-white dark:bg-gray-800 p-6 md:p-8 rounded-2xl shadow-2xl w-full max-w-md md:max-w-lg mx-4">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl md:text-3xl font-bold text-primary-light dark:text-primary-dark">
-              Поисковик по Магазинам
-            </h1>
-            <button
-              onClick=${toggleDarkMode}
-              class="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-300"
-              aria-label="Переключить тему"
-            >
-              ${darkMode
-                ? html`<svg class="w-5 h-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a1 1 0 011 1v1a1 1 0 01-2 0V3a1 1 0 011-1zm0 12a1 1 0 011 1v1a1 1 0 01-2 0v-1a1 1 0 011-1zm8-5a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zm-14 0a1 1 0 01-1 1H2a1 1 0 010-2h1a1 1 0 011 1zm11.95-4.536a1 1 0 010 1.414l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM6.464 15.536a1 1 0 010-1.414l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM15.536 15.536a1 1 0 01-1.414 0l-.707-.707a1 1 0 111.414-1.414l.707.707a1 1 0 010 1.414zM4.464 4.464a1 1 0 011.414 0l.707.707A1 1 0 014.464 6.585l-.707-.707a1 1 0 010-1.414zM10 6a4 4 0 100 8 4 4 0 000-8z"/></svg>`
-                : html`<svg class="w-5 h-5 text-gray-800 dark:text-gray-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707 8 8 0 1017.293 13.293z"/></svg>`
-              }
-            </button>
-          </div>
-
-          <div class="relative mb-4" role="search">
-            <input
-              ref=${inputRef}
-              type="text"
-              value=${query}
-              onInput=${e => setQuery(e.target.value)}
-              onKeyDown=${handleKeyDown}
-              placeholder="Введите номер или адрес магазина..."
-              class="w-full p-4 border-2 border-primary-light dark:border-primary-dark rounded-lg focus:outline-none focus:border-secondary-light dark:focus:border-secondary-dark transition duration-300 bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500"
-              aria-label="Поле поиска"
-              aria-autocomplete="list"
-              autocomplete="off"
-            />
-            ${showSuggestions && html`
-              <div
-                ref=${suggestionsRef}
-                id="suggestions-list"
-                class="absolute bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg mt-1 max-h-48 overflow-y-auto w-full z-10 shadow-lg animate-fadeIn"
-                role="listbox"
-                aria-label="Предложения поиска"
-              >
-                ${suggestions.map((item, index) => html`
-                  <div
-                    class="p-3 cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-700 transition duration-200 flex items-center"
-                    onClick=${() => selectSuggestion(item)}
-                    onKeyDown=${e => handleSuggestionKeyDown(e, index)}
-                    role="option"
-                    id="suggestion-${index}"
-                    aria-selected="false"
-                    tabindex="0"
-                  >
-                    <svg class="w-4 h-4 mr-2 text-primary-light dark:text-primary-dark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                    ${item.num}: ${item.name}
-                  </div>
-                `)}
-              </div>
-            `}
-          </div>
-
-          <button
-            onClick=${handleSearch}
-            class="w-full bg-primary-light dark:bg-primary-dark text-white py-3 rounded-lg font-semibold hover:bg-secondary-light dark:hover:bg-secondary-dark transition duration-300 mb-6 flex items-center justify-center"
-            aria-label="Кнопка поиска"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            Поиск
-          </button>
-
-          <div class="space-y-4 max-h-96 overflow-y-auto" aria-live="polite">
-            ${results.map(result => html`
-              <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg shadow-md animate-fadeIn">
-                <p class="font-semibold text-primary-light dark:text-primary-dark">Номер магазина: ${result.num}</p>
-                <p><strong>Территория:</strong> ${result.territory}</p>
-                <p><strong>Адрес магазина:</strong> ${result.name}</p>
-              </div>
-            `)}
-            ${results.length === 0 && query && html`
-              <p class="text-center text-gray-500 dark:text-gray-400">Ничего не найдено. Попробуйте другой запрос.</p>
-            `}
-          </div>
-        </div>
-      `;
+    // Utils
+    const $ = sel => document.querySelector(sel);
+    const el = (tag, props = {}, children = []) => {
+      const node = document.createElement(tag);
+      Object.assign(node, props);
+      (Array.isArray(children) ? children : [children]).forEach(c => {
+        if (c == null) return;
+        node.append(typeof c === 'string' ? document.createTextNode(c) : c);
+      });
+      return node;
     };
 
-    render(html`<${App} />`, document.getElementById('app'));
+    // Theme: prefer saved > system
+    (function initTheme(){
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved === 'dark' || (!saved && window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches)) {
+          document.documentElement.classList.add('dark');
+          THEME_TOGGLE.setAttribute('aria-pressed','true');
+        } else {
+          THEME_TOGGLE.setAttribute('aria-pressed','false');
+        }
+      } catch {}
+    })();
+
+    THEME_TOGGLE.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      try { localStorage.setItem('theme', isDark ? 'dark' : 'light'); } catch {}
+      THEME_TOGGLE.setAttribute('aria-pressed', String(isDark));
+      THEME_TOGGLE.blur();
+    });
+
+    // Fetch with AbortController + timeout
+    async function fetchJson(url, ms = 12000) {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), ms);
+      try {
+        const res = await fetch(url, { signal: controller.signal, cache: 'no-store' });
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return await res.json();
+      } finally {
+        clearTimeout(timeout);
+      }
+    }
+
+    // Populate select with data (expects array of {num,name,territory})
+    function populateSelect(list = []) {
+      // clear existing dynamic options
+      [...SELECT.options].slice(1).forEach(o => o.remove());
+      const fragment = document.createDocumentFragment();
+      for (const it of list) {
+        // Normalize
+        const num = String(it?.num ?? '').trim();
+        const name = String(it?.name ?? '').trim();
+        const territory = String(it?.territory ?? '').trim();
+        if (!num || !name) continue;
+        const option = el('option', { value: num });
+        option.textContent = `${num}: ${name}`;
+        option.dataset.territory = territory;
+        fragment.appendChild(option);
+      }
+      SELECT.appendChild(fragment);
+    }
+
+    // Render result card
+    function renderResult({ num, name, territory }) {
+      RESULTS.innerHTML = '';
+      const card = el('div', { className: 'card' }, [
+        el('div', {}, [
+          el('div', {}, `Номер магазина: ${num}`),
+          el('div', { className: 'meta' }, `Территория: ${territory || '—'}`),
+          el('div', { className: 'meta' }, `Адрес: ${name}`)
+        ])
+      ]);
+      RESULTS.appendChild(card);
+      // move focus to results for screen readers
+      card.setAttribute('tabindex','-1');
+      card.focus({ preventScroll: true });
+    }
+
+    // No-JS fallback note (progressive enhancement)
+    RESULTS.innerHTML = '<div class="meta">Загрузка списка магазинов…</div>';
+
+    // Load data.json only (user requested remove text.txt)
+    (async function init() {
+      try {
+        const data = await fetchJson('data.json', 12000);
+        if (!Array.isArray(data)) throw new TypeError('Ожидался массив объектов');
+        populateSelect(data);
+        RESULTS.innerHTML = '<div class="meta">Выберите магазин и нажмите «Поиск».</div>';
+      } catch (err) {
+        console.error(err);
+        RESULTS.innerHTML = '<div class="meta" role="alert">Не удалось загрузить данные. Проверьте data.json.</div>';
+      }
+    })();
+
+    // Handle form submit
+    FORM.addEventListener('submit', (ev) => {
+      ev.preventDefault();
+      const idx = SELECT.selectedIndex;
+      const opt = SELECT.options[idx];
+      if (!opt || !opt.value) {
+        RESULTS.innerHTML = '<div class="meta">Пожалуйста, выберите магазин.</div>';
+        SELECT.focus();
+        return;
+      }
+      renderResult({ num: opt.value, name: opt.textContent.replace(/^\d+:\s*/,'') , territory: opt.dataset.territory });
+    });
+
+    // Enter on select triggers search (accessibility)
+    SELECT.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        SEARCH_BTN.click();
+      }
+    });
+
+    // Expose minimal globals for debugging only in non-production
+    try {
+      if (window.location.hostname === 'localhost') {
+        window._shopDebug = { populateSelect, renderResult, fetchJson };
+      }
+    } catch {}
   </script>
+
+  <!-- Minimal visually-hidden utility -->
+  <style>
+    .visually-hidden{
+      position: absolute !important;
+      height: 1px; width: 1px;
+      overflow: hidden;
+      clip: rect(1px,1px,1px,1px);
+      white-space: nowrap;
+      border: 0; padding: 0; margin: -1px;
+    }
+  </style>
 </body>
 </html>
