@@ -1,226 +1,108 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Эпичный троллинг Артема!">
-  <title>Артем, держись! 😈</title>
-  <!-- Bootstrap 5 CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTWZyjvZgoV+^/i5f5V5f5V5f5V5f5V5f5V5f5V5f5V5f5V5f5V5f5V5f5V5f5V" crossorigin="anonymous">
-  <!-- GSAP для анимаций -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Артем лох!
+  </title>
   <style>
     html, body {
       height: 100%;
       margin: 0;
-      overflow: hidden;
     }
     body {
       display: flex;
       align-items: center;
       justify-content: center;
-      background-image: url("https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg");
+      background-image: url("https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg"); /* Замени ссылку на свою картинку */
       background-size: cover;
       background-position: center;
       font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-      color: #fff;
-      text-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
     }
-    .main-btn {
-      padding: 1.5rem 3rem;
-      font-size: 1.5rem;
-      font-weight: bold;
-      border-radius: 50px;
-      background: linear-gradient(45deg, #ff4b4b, #ff8e53);
+    button {
+      padding: 1em 2em;
+      font-size: 1.2em;
       border: none;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      transition: transform 0.2s;
-      position: relative;
-      z-index: 10;
-    }
-    .main-btn:hover {
-      transform: scale(1.1);
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
-    }
-    .modal-content {
-      background: linear-gradient(135deg, #1a1a1a, #4b0082);
-      color: #fff;
-      border: none;
-      border-radius: 20px;
-      padding: 2rem;
-      max-width: 450px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-      position: relative;
-      overflow: hidden;
-    }
-    .modal-content h1 {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #ff4b4b;
-      margin-bottom: 1rem;
-      animation: blink 0.5s infinite;
-    }
-    .modal-content p {
-      font-size: 1.3rem;
-      color: #ddd;
-      margin-bottom: 1.5rem;
-    }
-    .close-btn {
-      background: #ff4b4b;
-      color: white;
-      font-weight: bold;
-      padding: 0.75rem 2rem;
-      border-radius: 30px;
-      border: none;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
       transition: background 0.3s;
     }
+    button:hover {
+      background: rgba(255, 255, 255, 1);
+    }
+
+    /* Стиль для модального окна */
+    .modal {
+      display: none; /* скрыто по умолчанию */
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2em;
+      border-radius: 12px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      animation: fadeIn 0.3s ease;
+    }
+    .modal-content p {
+      margin: 0 0 1em;
+      font-size: 1.2em;
+    }
+    .close-btn {
+      padding: 0.5em 1.5em;
+      background: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+    }
     .close-btn:hover {
-      background: #e63939;
+      background: #0056b3;
     }
-    .modal-backdrop {
-      background: rgba(0, 0, 0, 0.9);
-    }
-    .trollface {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 100px;
-      height: 100px;
-      background: url("https://i.imgur.com/6Q8Q3.png") no-repeat center;
-      background-size: contain;
-      display: none;
-      z-index: 1000;
-    }
-    .confetti {
-      position: fixed;
-      width: 15px;
-      height: 15px;
-      background: #f00;
-      opacity: 0.8;
-      animation: explode 1.5s ease-out forwards;
-      pointer-events: none;
-    }
-    @keyframes explode {
-      0% { transform: translate(0, 0) scale(1); opacity: 1; }
-      100% { transform: translate(calc(50vw - 50%), calc(50vh - 50%)) scale(0); opacity: 0; }
-    }
-    @keyframes blink {
-      50% { opacity: 0; }
-    }
-    @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    @keyframes fadeIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
-  <!-- Основная кнопка -->
-  <button type="button" class="btn main-btn" id="mainBtn" aria-label="Открыть шуточное сообщение">
-    Артем, попробуй поймать! 😈
-  </button>
+  <button id="openModal">Нажми на меня</button>
 
-  <!-- Модальное окно -->
-  <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content">
-        <h1 id="modalLabel">Артем, ты попался! 😜</h1>
-        <p id="jokeText">Тут будет шутка...</p>
-        <button type="button" class="btn close-btn" data-bs-dismiss="modal" aria-label="Закрыть">Ладно, сдаюсь!</button>
-      </div>
+  <!-- Кастомный диалог -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <p>Артем лох</p>
+      <button class="close-btn" id="closeModal">OK</button>
     </div>
   </div>
 
-  <!-- Троллфейс -->
-  <div class="trollface" id="trollface"></div>
-
-  <!-- Звуковые эффекты -->
-  <audio id="trollSound" src="https://www.myinstants.com/media/sounds/trollolol.mp3"></audio>
-
-  <!-- Bootstrap 5 JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
   <script>
-    // Список шуточных фраз с черным юмором
-    const jokes = [
-      "Артем, твой Wi-Fi настолько медленный, что даже черепаха обгоняет! 😆",
-      "Ты так долго грузишь, Артем, что я успел завести семью! 😈",
-      "Артем, твои шутки настолько старые, что их нашли в пирамидах! 😅",
-      "Твой код, Артем, настолько плох, что даже баг боится в нем жить! 😜",
-      "Артем, ты такой лох, что даже лохотрон тебя обходит стороной! 😎",
-      "Ты так медленно бегаешь, Артем, что улитка вызвала тебя на дуэль! 😹"
-    ];
-
-    // Элементы
     const modal = document.getElementById("myModal");
-    const mainBtn = document.getElementById("mainBtn");
-    const trollface = document.getElementById("trollface");
-    const jokeText = document.getElementById("jokeText");
-    const trollSound = document.getElementById("trollSound");
-
-    // GSAP анимация для кнопки при загрузке
-    gsap.from(mainBtn, {
-      scale: 0.8,
-      opacity: 0,
-      duration: 1,
-      ease: "elastic.out(1, 0.3)",
+    const openBtn = document.getElementById("openModal");
+    const closeBtn = document.getElementById("closeModal");
+    
+    modal.style.display = "none";
+    
+    openBtn.addEventListener("click", () => {
+      modal.style.display = "flex";
     });
 
-    // Убегающая кнопка
-    mainBtn.addEventListener("mousemove", (e) => {
-      if (Math.random() > 0.3) { // 70% шанс убежать
-        const maxMove = 100;
-        const newX = Math.random() * maxMove - maxMove / 2;
-        const newY = Math.random() * maxMove - maxMove / 2;
-        gsap.to(mainBtn, {
-          x: newX,
-          y: newY,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-      }
+    closeBtn.addEventListener("click", () => {
+      modal.style.display = "none";
     });
 
-    // При открытии модального окна
-    modal.addEventListener("show.bs.modal", () => {
-      // Случайная шутка
-      jokeText.textContent = jokes[Math.floor(Math.random() * jokes.length)];
-      // Показ троллфейса
-      trollface.style.display = "block";
-      gsap.to(trollface, {
-        scale: 1.2,
-        rotation: 360,
-        duration: 1,
-        ease: "bounce.out",
-        repeat: -1,
-        yoyo: true,
-      });
-      // Звук троллинга
-      trollSound.play().catch(() => console.log("Звук не воспроизведен"));
-      // Конфетти
-      for (let i = 0; i < 100; i++) {
-        const confetti = document.createElement("div");
-        confetti.className = "confetti";
-        confetti.style.left = Math.random() * 100 + "vw";
-        confetti.style.background = `hsl(${Math.random() * 360}, 70%, 50%)`;
-        confetti.style.animationDelay = Math.random() * 0.5 + "s";
-        document.body.appendChild(confetti);
-        setTimeout(() => confetti.remove(), 1500);
-      }
-    });
-
-    // При закрытии модального окна
-    modal.addEventListener("hide.bs.modal", () => {
-      trollface.style.display = "none";
-      gsap.to(trollface, { clearProps: "all" });
-      trollSound.pause();
-      trollSound.currentTime = 0;
-    });
-
-    // Закрытие по клику на фон
+    // закрытие по клику вне окна
     modal.addEventListener("click", (e) => {
       if (e.target === modal) {
-        bootstrap.Modal.getInstance(modal).hide();
+        modal.style.display = "none";
       }
     });
   </script>
