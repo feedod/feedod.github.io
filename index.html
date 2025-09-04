@@ -1,110 +1,104 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Артем лох!
-  </title>
-  <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-    }
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-image: url("https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg"); /* Замени ссылку на свою картинку */
-      background-size: cover;
-      background-position: center;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    }
-    button {
-      padding: 1em 2em;
-      font-size: 1.2em;
-      border: none;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.8);
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: rgba(255, 255, 255, 1);
-    }
-
-    /* Стиль для модального окна */
-    .modal {
-      display: none; /* скрыто по умолчанию */
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .modal-content {
-      background: white;
-      padding: 2em;
-      border-radius: 12px;
-      max-width: 300px;
-      text-align: center;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-      animation: fadeIn 0.3s ease;
-    }
-    .modal-content p {
-      margin: 0 0 1em;
-      font-size: 1.2em;
-    }
-    .close-btn {
-      padding: 0.5em 1.5em;
-      background: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 1em;
-    }
-    .close-btn:hover {
-      background: #0056b3;
-    }
-    @keyframes fadeIn {
-      from { transform: scale(0.9); opacity: 0; }
-      to   { transform: scale(1); opacity: 1; }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Прикол над Артемом-лохом!</title>
+    <!-- Tailwind CSS CDN (latest v4 as of 2025) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Preact CDN with import map (latest stable 10.27.1 as of 2025) -->
+    <script type="importmap">
+        {
+            "imports": {
+                "preact": "https://esm.sh/preact@10.27.1",
+                "preact/": "https://esm.sh/preact@10.27.1/",
+                "preact/hooks": "https://esm.sh/preact@10.27.1/hooks"
+            }
+        }
+    </script>
 </head>
-<body>
-  <button id="openModal">Нажми на меня</button>
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 antialiased" style="background-image: url('https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg'); background-size: cover; background-position: center;">
+    <div id="app"></div>
 
-  <!-- Кастомный диалог -->
-  <div id="myModal" class="modal">
-    <div class="modal-content">
-      <p>Артем лох</p>
-      <button class="close-btn" id="closeModal">OK</button>
-    </div>
-  </div>
+    <script type="module">
+        import { h, render } from 'preact';
+        import { useState } from 'preact/hooks';
 
-  <script>
-    const modal = document.getElementById("myModal");
-    const openBtn = document.getElementById("openModal");
-    const closeBtn = document.getElementById("closeModal");
-    
-    modal.style.display = "none";
-    
-    openBtn.addEventListener("click", () => {
-      modal.style.display = "flex";
-    });
+        // Array of maximum black humor jokes with "loh" theme
+        const jokes = [
+            "Артем - такой лох, что даже его тень от него уходит, потому что не хочет ассоциироваться с неудачником! 💀",
+            "Почему Артем - лох? Он думает, что 'loh' - это аббревиатура от 'Lord of Heaven', а на самом деле он просто loser of hell! 😈",
+            "Артем - полный лох: когда он родился, доктор сказал 'Извините, это ошибка!' и попробовал вернуть его обратно. ⚰️",
+            "Артем так лоховат, что если бы лохство было олимпийским видом спорта, он бы даже не квалифицировался - слишком лох! 🪦",
+            "Артем - лох уровня бог: он может потерять даже то, чего у него нет, вроде друзей или удачи! 🧟‍♂️",
+            "Почему Артем не играет в лотерею? Потому что даже удача знает, что он лох и не заслуживает выигрыша! 😈",
+            "Артем - лох, который думает, что зеркало нуждается в перерыве, когда смотрит на него. 💀",
+            "Если Артем упадёт в реку, он не утонет - лохи всегда всплывают лицом вниз! 🪦"
+        ];
 
-    closeBtn.addEventListener("click", () => {
-      modal.style.display = "none";
-    });
+        // Function to get a random joke
+        const getRandomJoke = () => jokes[Math.floor(Math.random() * jokes.length)];
 
-    // закрытие по клику вне окна
-    modal.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-      }
-    });
-  </script>
+        // Main App Component
+        const App = () => {
+            const [showModal, setShowModal] = useState(false);
+            const [currentJoke, setCurrentJoke] = useState('');
+
+            const handleShowJoke = () => {
+                setCurrentJoke(getRandomJoke());
+                setShowModal(true);
+            };
+
+            const handleCloseModal = () => {
+                setShowModal(false);
+            };
+
+            const handleExtraPrank = () => {
+                alert('Ещё один прикол: Артем - такой лох, что его жизнь - это комедия ошибок, где он главный клоун! 😂💀');
+            };
+
+            return (
+                h('div', { className: 'relative max-w-lg w-full bg-black bg-opacity-50 rounded-xl shadow-2xl p-8 text-center' },
+                    h('h1', { className: 'text-4xl font-extrabold mb-6 text-red-500' }, 'Прикол над Артемом-лохом!'),
+                    h('p', { className: 'text-xl mb-8 font-medium' }, 'Артем, ты полный лох! Нажми кнопку, чтобы получить дозу чёрного юмора про себя. Готов к унижению?'),
+                    h('button', {
+                        onClick: handleShowJoke,
+                        className: 'bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mb-4'
+                    }, 'Расскажи шутку про лоха!'),
+                    h('button', {
+                        onClick: handleExtraPrank,
+                        className: 'bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105'
+                    }, 'Ещё один прикол над лохом'),
+
+                    // Animation element
+                    showModal && h('img', {
+                        src: 'https://www.animatedimages.org/data/media/1102/animated-condom-image-0005.gif',
+                        alt: 'Анимация гондона',
+                        className: 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 animate-bounce z-40'
+                    }),
+
+                    // Custom Modal Dialog with transition
+                    showModal && h('div', { className: 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300' },
+                        h('div', { className: 'bg-gray-900 rounded-xl p-8 max-w-md w-full text-center relative shadow-2xl transform transition-all duration-300 scale-100' },
+                            h('button', {
+                                onClick: handleCloseModal,
+                                className: 'absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold'
+                            }, '✕'),
+                            h('h2', { className: 'text-3xl font-bold mb-4 text-red-500' }, 'Чёрная шутка про Артема-лоха:'),
+                            h('p', { className: 'text-lg mb-6' }, currentJoke),
+                            h('button', {
+                                onClick: handleCloseModal,
+                                className: 'bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105'
+                            }, 'Закрыть и плакать')
+                        )
+                    )
+                )
+            );
+        };
+
+        // Render the app
+        render(h(App), document.getElementById('app'));
+    </script>
 </body>
 </html>
