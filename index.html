@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Прикол над Артемом-лохом!</title>
+    <!-- Google Fonts for cool font -->
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&display=swap" rel="stylesheet">
     <!-- Tailwind CSS CDN (latest v4 as of 2025) -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- Preact CDN with import map (latest stable 10.27.1 as of 2025) -->
@@ -17,28 +19,53 @@
             }
         }
     </script>
+    <style>
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .animate-shake {
+            animation: shake 2s infinite ease-in-out;
+        }
+    </style>
 </head>
-<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 antialiased" style="background-image: url('https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg'); background-size: cover; background-position: center;">
+<body class="text-white min-h-screen flex flex-col items-center justify-center p-4 antialiased font-['Bangers',sans-serif]" style="background-image: url('https://radika1.link/2025/09/03/IMG_17950bf8e4cd8e6c4c14.jpeg'); background-size: cover; background-position: center; filter: grayscale(100%);">
     <div id="app"></div>
 
     <script type="module">
         import { h, render } from 'preact';
         import { useState } from 'preact/hooks';
 
-        // Array of maximum black humor jokes with "loh" theme
+        // Array of maximum black humor jokes with "loh" theme, amped up for satire
         const jokes = [
-            "Артем - такой лох, что даже его тень от него уходит, потому что не хочет ассоциироваться с неудачником! 💀",
-            "Почему Артем - лох? Он думает, что 'loh' - это аббревиатура от 'Lord of Heaven', а на самом деле он просто loser of hell! 😈",
-            "Артем - полный лох: когда он родился, доктор сказал 'Извините, это ошибка!' и попробовал вернуть его обратно. ⚰️",
-            "Артем так лоховат, что если бы лохство было олимпийским видом спорта, он бы даже не квалифицировался - слишком лох! 🪦",
-            "Артем - лох уровня бог: он может потерять даже то, чего у него нет, вроде друзей или удачи! 🧟‍♂️",
-            "Почему Артем не играет в лотерею? Потому что даже удача знает, что он лох и не заслуживает выигрыша! 😈",
-            "Артем - лох, который думает, что зеркало нуждается в перерыве, когда смотрит на него. 💀",
-            "Если Артем упадёт в реку, он не утонет - лохи всегда всплывают лицом вниз! 🪦"
+            "Артем - такой эпический лох, что даже вирусы его обходят, боясь заразиться неудачей! 💀",
+            "Почему Артем - король лохов? Он думает, что 'loh' значит 'Lots of Hugs', а на деле - Loser of Humanity! 😈",
+            "Артем - лох-легенда: при его рождении вселенная вздохнула и сказала 'Опять ошибка эволюции!' ⚰️",
+            "Артем так лоховски гениален, что в Олимпиаде по лохству он бы занял последнее место - типичный лох! 🪦",
+            "Артем - бог лохов: теряет даже виртуальные вещи, как уважение и шансы на успех! 🧟‍♂️",
+            "Артем избегает лотереи, потому что билеты сами сбегают от такого лоха! 😈",
+            "Артем - лох, от которого зеркала трескаются, чтобы не смотреть на это зрелище. 💀",
+            "Если Артем тонет, он всплывет - лохи всегда на дне, но лицом вверх для позора! 🪦",
+            "Артем - сатирический лох: его жизнь - фарс, где он главный шут без таланта! 😂💀"
         ];
 
         // Function to get a random joke
         const getRandomJoke = () => jokes[Math.floor(Math.random() * jokes.length)];
+
+        // Function to generate random positions
+        const getRandomPosition = () => ({
+            left: `${Math.random() * 90 + 5}%`,
+            top: `${Math.random() * 90 + 5}%`
+        });
 
         // Main App Component
         const App = () => {
@@ -55,42 +82,56 @@
             };
 
             const handleExtraPrank = () => {
-                alert('Ещё один прикол: Артем - такой лох, что его жизнь - это комедия ошибок, где он главный клоун! 😂💀');
+                alert('Сатирический бонус: Артем - лох-император, правящий империей провалов и позора! 😂💀');
             };
 
+            // Generate 8 random Durex condom images
+            const condomImages = Array.from({ length: 8 }, (_, index) => {
+                const pos = getRandomPosition();
+                return h('img', {
+                    key: index,
+                    src: 'https://pngimg.com/uploads/condom/condom_PNG12.png',
+                    alt: 'Презерватив Durex',
+                    className: 'absolute w-16 h-16 opacity-50 animate-shake filter grayscale',
+                    style: { left: pos.left, top: pos.top }
+                });
+            });
+
             return (
-                h('div', { className: 'relative max-w-lg w-full bg-black bg-opacity-50 rounded-xl shadow-2xl p-8 text-center' },
-                    h('h1', { className: 'text-4xl font-extrabold mb-6 text-red-500' }, 'Прикол над Артемом-лохом!'),
-                    h('p', { className: 'text-xl mb-8 font-medium' }, 'Артем, ты полный лох! Нажми кнопку, чтобы получить дозу чёрного юмора про себя. Готов к унижению?'),
+                h('div', { className: 'relative max-w-lg w-full bg-black bg-opacity-30 rounded-xl shadow-2xl p-8 text-center animate-fade-in' },
+                    ...condomImages, // Add the floating condom images
+
+                    h('h1', { className: 'text-5xl font-extrabold mb-6 text-white animate-pulse' }, 'Эпический прикол над Артемом-лохом!'),
+                    h('p', { className: 'text-2xl mb-8 font-medium animate-bounce-slow' }, 'Артем, ты - сатирический король лохов! Жми кнопку для чёрного юмора уровня бога. Готов к тотальному roast?'),
                     h('button', {
                         onClick: handleShowJoke,
-                        className: 'bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 mb-4'
-                    }, 'Расскажи шутку про лоха!'),
+                        className: 'bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-110 hover:rotate-3 mb-4 shadow-lg'
+                    }, 'Шутка про супер-лоха!'),
                     h('button', {
                         onClick: handleExtraPrank,
-                        className: 'bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105'
-                    }, 'Ещё один прикол над лохом'),
+                        className: 'bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-110 hover:-rotate-3 shadow-lg'
+                    }, 'Ещё roast над лохом'),
 
-                    // Animation element
+                    // Animation element with enhanced effects
                     showModal && h('img', {
                         src: 'https://www.animatedimages.org/data/media/1102/animated-condom-image-0005.gif',
                         alt: 'Анимация гондона',
-                        className: 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 animate-bounce z-40'
+                        className: 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 animate-spin-bounce z-40 filter grayscale'
                     }),
 
-                    // Custom Modal Dialog with transition
-                    showModal && h('div', { className: 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 transition-opacity duration-300' },
-                        h('div', { className: 'bg-gray-900 rounded-xl p-8 max-w-md w-full text-center relative shadow-2xl transform transition-all duration-300 scale-100' },
+                    // Custom Modal Dialog with transition and effects
+                    showModal && h('div', { className: 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-500 opacity-100' },
+                        h('div', { className: 'bg-black bg-opacity-70 rounded-xl p-8 max-w-md w-full text-center relative shadow-2xl transform transition-all duration-500 scale-105 animate-wiggle' },
                             h('button', {
                                 onClick: handleCloseModal,
-                                className: 'absolute top-3 right-3 text-gray-400 hover:text-white text-2xl font-bold'
+                                className: 'absolute top-3 right-3 text-white hover:text-gray-300 text-3xl font-bold'
                             }, '✕'),
-                            h('h2', { className: 'text-3xl font-bold mb-4 text-red-500' }, 'Чёрная шутка про Артема-лоха:'),
-                            h('p', { className: 'text-lg mb-6' }, currentJoke),
+                            h('h2', { className: 'text-4xl font-bold mb-4 text-white animate-pulse' }, 'Сатирическая чёрная шутка про Артема-лоха:'),
+                            h('p', { className: 'text-xl mb-6' }, currentJoke),
                             h('button', {
                                 onClick: handleCloseModal,
-                                className: 'bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105'
-                            }, 'Закрыть и плакать')
+                                className: 'bg-transparent border-2 border-white hover:bg-white hover:text-black text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-110'
+                            }, 'Закрыть и рыдать от смеха')
                         )
                     )
                 )
